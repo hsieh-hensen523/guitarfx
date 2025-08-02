@@ -5,7 +5,9 @@
 from .spatial.Delay import Delay
 from .gain_stage.Distortion import Distortion
 from .gain_stage.Overdrive import Overdrive # Assuming you have an Overdrive.py as well.
-# from .filters.PeakingEQ import PeakingEQ # Assuming you have a PeakingEQ.py as well.
+from .gain_stage.Gain import Gain # Assuming you have a Gain.py as well.
+from .filters.PeakingEQ import PeakingEQ # Assuming you have a PeakingEQ.py as well.
+from .filters.Equalizer import ThreeBandEQ # Assuming you have a ThreeBandEQ.py as well.
 from .filters.Filters import LowpassFilter, HighpassFilter, BandpassFilter
 from .dynamics.noise_reduction import NoiseReduction # Assuming you have a noise_reduction.py as well.
 from .spatial.Convolution import ConvolutionIR # Assuming you have a Convolution.py as well.
@@ -16,10 +18,12 @@ __all__ = [
     "Delay",
     "Distortion",
     "Overdrive",
-    # "PeakingEQ",
+    "PeakingEQ",
     "LowpassFilter",
     "HighpassFilter",
     "BandpassFilter",
     "NoiseReduction",
-    "Convolution"
+    "ConvolutionIR",
+    "ThreeBandEQ",
+    "Gain"
 ]

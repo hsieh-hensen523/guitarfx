@@ -26,12 +26,13 @@ class AudioProcessor:
         self.speech_frame_count = 0
         self.speech_started = False
         self.SPEECH_FRAME_THRESHOLD = 5  # 你可以設定一個適合的值
+        self.prev_energy = 0.0
         
         # 降躁處理
         self.noise = NoiseReduction(
             samplerate=self.samplerate,
             chunk_size=self.chunk_size,
-            learning_frames=10  # 你可以根據需要調整學習幀數
+            learning_frames=20  # 你可以根據需要調整學習幀數
         )
         
         # 增加音箱模擬效果
@@ -95,12 +96,13 @@ class AudioProcessor:
         # 3. 爆音偵測與靜音狀態
         fft_magnitude = np.abs(np.fft.rfft(processed_array))
         rms = get_rms(filtered_array)
+        is_pop, self.prev_energy = is_pop_noise(fft_magnitude, self.samplerate, self.prev_energy)
 
         if (
-            is_pop_noise(fft_magnitude, self.samplerate)
+            is_pop
             and rms > self.MAX_VOLUME_RMS
         ):
-            print(f"[爆音偵測] RMS={rms:.4f}")
+            #print(f"[爆音偵測] RMS={rms:.4f}")
             self.pop_noise_silence_counter = self.POP_SILENCE_FRAMES
             print("→ 進入爆音靜音狀態")
 
@@ -124,7 +126,7 @@ class AudioProcessor:
             # 如果沒有語音，回傳靜音數據 (這就是Noise Gate)
             # 即使 filtered_array 還有微小雜音，這裡也直接靜音
             silent_array = np.zeros_like(int16_array, dtype=np.int16)
-            print("輸出靜音數據 (無語音)")
+            #print("輸出靜音數據 (無語音)")
             return (silent_array.tobytes(), pyaudio.paContinue)
     
     

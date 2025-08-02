@@ -9,16 +9,15 @@ def get_rms(data):
         return 0.0
     return np.sqrt(np.mean(np.square(data)))
 
-def is_pop_noise(fft_magnitude, sample_rate, threshold_ratio=0.2, min_energy=0.01):
+def is_pop_noise(fft_magnitude, sample_rate, prev_energy=0.0, min_energy=0.01):
     # freqs = np.fft.rfftfreq(len(fft_magnitude)*2 - 1, 1/sample_rate)
     total_energy = np.sum(fft_magnitude)
     if total_energy < min_energy:
-        return False
-    # speech_band = (freqs >= 100) & (freqs <= 3500)
-    # # speech_energy = np.sum(fft_magnitude[speech_band])
-    # # # if speech_energy > 50:
-    # # #     print(f"Total energy: {total_energy}, Speech energy: {speech_energy}")
-    return total_energy > 1000
+        return False, prev_energy
+    if total_energy - prev_energy > 500:
+        print(f"[爆音偵測] 檢測到爆音: 總能量={total_energy:.4f}, 前一能量={prev_energy:.4f}")
+        return total_energy - prev_energy > 500, prev_energy
+    return False, total_energy
 
 def is_transient_noise(data, threshold=0.3):
     diff = np.abs(np.diff(data))

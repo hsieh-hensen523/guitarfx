@@ -1,6 +1,6 @@
 # effects/Distortion.py
 
-from ..filters.Filters import HighpassFilter
+from ..filters.Filters import LowpassFilter
 from ..base_effect import AudioEffect
 import soundfile as sf
 import numpy as np
@@ -37,8 +37,8 @@ class Distortion(AudioEffect):
         self.filter_order = filter_order
         self.auto_gain_compensation = auto_gain_compensation
         self.lfilter_state = None  # Initialize filter state
-        self.highpass_filter = HighpassFilter(samplerate, cutoff_freq=filter_cutoff_freq, order=filter_order) if filter_cutoff_freq else None
-        
+        self.lowpass_filter = LowpassFilter(samplerate, cutoff_freq=filter_cutoff_freq, order=filter_order) if filter_cutoff_freq else None
+
         # Validate initial parameters
         self._validate_params()
 
@@ -135,28 +135,24 @@ class Distortion(AudioEffect):
         processed_data = np.clip(processed_data, -1.0, 1.0) # Final clamping to ensure range
 
         if self.filter_cutoff_freq is not None:
-            processed_data = self.highpass_filter.process(processed_data)
+            processed_data = self.lowpass_filter.process(processed_data)
 
         return processed_data
 
 # Example of how to use this class (for testing purposes, not part of GUI)
 if __name__ == "__main__":
-    # Dummy input audio file for testing
-    # 獲取當前腳本的目錄
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
     current_script_dir = os.path.dirname(__file__)
-
-    # 向上走一級目錄 (your_project_root)
     parent_dir = os.path.abspath(os.path.join(current_script_dir, os.pardir))
+    music_dir = os.path.join(project_root, 'music')
 
-    # 構建到 music 資料夾的路徑
-    music_dir = os.path.join(parent_dir, 'music')
-
-    # 構建完整的輸入和輸出檔案路徑
     input_audio_file = os.path.join(music_dir, 'funky_guitar.wav')
-    output_hard_clipped_file = os.path.join(music_dir, 'output_hard_clipped.wav')
+    processed_music_dir = os.path.join(project_root, 'processed_audio')
+    output_audio_file = os.path.join(processed_music_dir, 'processed_distortion_auto_comp.wav')
 
     print(f"Input file path: {input_audio_file}")
-    print(f"Output file path: {output_hard_clipped_file}")
+    print(f"Output file path: {output_audio_file}")
 
     print("Testing Distortion:")
     
@@ -171,7 +167,7 @@ if __name__ == "__main__":
         clipper_auto = Distortion(samplerate=samplerate, threshold=0.6, pregain=50.0, 
                                   filter_cutoff_freq=12000, auto_gain_compensation=True)
         processed_audio_auto = clipper_auto.process(data)
-        sf.write('processed_distortion_auto_comp.wav', processed_audio_auto, samplerate)
+        sf.write(output_audio_file, processed_audio_auto, samplerate)
         print("Processed audio with auto compensation saved to processed_distortion_auto_comp.wav")
 
         # # --- Test with manual postgain ---

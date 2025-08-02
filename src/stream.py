@@ -44,29 +44,44 @@ def animate(i, line_time, line_freq, processor, rate, chunk):
             if len(data) < chunk:
                 return line_time, line_freq
             
+            # 更新時域資料
             line_time.set_ydata(data)
             
+            # 頻域分析 + 轉為 dB
             fft_data = np.abs(np.fft.rfft(data))
-            fft_data = fft_data / np.max(fft_data + 1e-10)
+            fft_data = fft_data / np.max(fft_data + 1e-10)  # 正規化
+            # fft_db = 20 * np.log10(fft_data + 1e-10)         # dB scale
+
             line_freq.set_ydata(fft_data)
             
         except queue.Empty:
-            # 如果隊列為空，則不做任何事
             return line_time, line_freq
             
     return line_time, line_freq
 
 def init_plot(rate, chunk):
     fig, (ax1, ax2) = plt.subplots(2, 1)
+
+    # 時域設定
     t = np.arange(chunk) / rate
-    f = np.fft.rfftfreq(chunk, d=1./rate)
     line_time, = ax1.plot(t, np.zeros(chunk))
     ax1.set_ylim(-1, 1)
     ax1.set_title("Time Domain")
+    ax1.set_xlabel("Time (s)")
+    ax1.set_ylabel("Amplitude")
+
+    # 頻域設定
+    f = np.fft.rfftfreq(chunk, d=1./rate)
     line_freq, = ax2.plot(f, np.zeros(len(f)))
-    ax2.set_ylim(0, 1)
-    ax2.set_xlim(0, rate / 2)
+
+    ax2.set_xlim(0, rate/2)      
+    ax2.set_ylim(0, 1)           
     ax2.set_title("Frequency Domain")
+    ax2.set_xlabel("Frequency (Hz)")
+    ax2.set_ylabel("Magnitude")
+
+    plt.tight_layout()
+
     return fig, line_time, line_freq
 
 # ---------------------------- 主程式 ----------------------------

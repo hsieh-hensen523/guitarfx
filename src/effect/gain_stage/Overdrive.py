@@ -97,12 +97,16 @@ class Overdrive:
 if __name__ == "__main__":
     import os
     import soundfile as sf
+    
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
     current_script_dir = os.path.dirname(__file__)
     parent_dir = os.path.abspath(os.path.join(current_script_dir, os.pardir))
-    music_dir = os.path.join(parent_dir, 'music')
+    music_dir = os.path.join(project_root, 'music')
 
     input_audio_file = os.path.join(music_dir, 'funky_guitar.wav')
+    processed_music_dir = os.path.join(project_root, 'processed_audio')
+    output_audio_file = os.path.join(processed_music_dir, 'processed_overdrive_auto_comp.wav')
 
     print(f"Input file path: {input_audio_file}")
     
@@ -116,7 +120,7 @@ if __name__ == "__main__":
         print("\n--- Testing SoftClipping with Auto Gain Compensation ---")
         overdrive_auto = Overdrive(samplerate=samplerate, pregain=15.0, auto_gain_compensation=True)
         processed_audio_auto = overdrive_auto.process(data)
-        sf.write('processed_overdrive_auto_comp.wav', processed_audio_auto, samplerate)
+        sf.write(output_audio_file, processed_audio_auto, samplerate)
         print("Processed audio with auto compensation saved to processed_overdrive_auto_comp.wav")
 
         # # --- Test with manual postgain ---

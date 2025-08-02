@@ -7,3 +7,11 @@ venv/
 
 # Editor config files
 .vscode/
+
+# Music files
+*.mp3
+*.wav
+*.flac
+
+# txt files
+*.txt

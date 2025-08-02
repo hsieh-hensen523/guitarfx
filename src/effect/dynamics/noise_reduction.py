@@ -6,7 +6,7 @@ from scipy.fft import rfft, irfft
 from scipy.signal import windows
 
 class NoiseReduction(AudioEffect):
-    def __init__(self, samplerate, chunk_size, learning_frames=10, overlap_ratio=0.5):
+    def __init__(self, samplerate, chunk_size, learning_frames=20, overlap_ratio=0.5):
         # 初始化常數
         self.samplerate = samplerate
         self.chunk_size = chunk_size
@@ -59,12 +59,18 @@ class NoiseReduction(AudioEffect):
             fft_phase = np.angle(fft_data)
             
             # 4. 頻譜減法
-            over_subtraction_factor = 1.2
-            snr = fft_magnitude / (self.noise_profile + 1e-10)
-            gain_mask = np.maximum(snr - over_subtraction_factor, 0) / (snr - over_subtraction_factor + 1e-10)
-            gain_mask = np.clip(gain_mask, 0, 1)
-
-            processed_magnitude = fft_magnitude * gain_mask
+            # over_subtraction_factor = 1.2
+            # snr = fft_magnitude / (self.noise_profile + 1e-10)
+            # gain_mask = np.maximum(snr - over_subtraction_factor, 0) / (snr - over_subtraction_factor + 1e-10)
+            # gain_mask = np.clip(gain_mask, 0, 1)
+# 
+            # processed_magnitude = fft_magnitude * gain_mask
+            
+            # Wiener Filter 增益掩碼
+            alpha = 1.0  # 過度減法因子
+            snr_posterior = fft_magnitude**2 / (self.noise_profile**2 + 1e-10)
+            gain_mask_wiener = snr_posterior / (snr_posterior + alpha)
+            processed_magnitude = fft_magnitude * gain_mask_wiener
             processed_fft = processed_magnitude * np.exp(1j * fft_phase)
             
             # 5. 轉換回時域
